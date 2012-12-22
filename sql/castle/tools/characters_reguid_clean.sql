@@ -138,6 +138,7 @@ DELETE FROM `item_refund_instance` WHERE `item_guid` NOT IN (SELECT `guid` FROM 
 
 -- CUSTOM - TRINICHAT AUTOINVITE
 -- DELETE FROM `world`.`irc_inchan` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
+-- UPDATE `world`.`irc_inchan` SET `name` = (SELECT `name` FROM `characters` WHERE `characters`.`guid` = `world`.`irc_inchan`.`guid`);
 
 
 
@@ -148,9 +149,7 @@ DELETE FROM `item_refund_instance` WHERE `item_guid` NOT IN (SELECT `guid` FROM 
 DROP TABLE IF EXISTS `tmp_guid_table`;
 CREATE TABLE `tmp_guid_table` (
 	`guid_new` INT(10) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	`guid` INT(10) unsigned NOT NULL,
-	INDEX USING HASH (`guid_new`),
-	INDEX USING HASH (`guid`)
+	`guid` INT(10) unsigned NOT NULL
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 SET @s = CONCAT('ALTER TABLE `tmp_guid_table` AUTO_INCREMENT = ', @START_GUID_CHARS);
@@ -164,9 +163,7 @@ INSERT INTO `tmp_guid_table` (`guid`) SELECT `guid` FROM `characters`;
 DROP TABLE IF EXISTS `tmp_groups_table`;
 CREATE TABLE `tmp_groups_table` (
 	`guid_new` INT(10) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	`guid` INT(10) unsigned NOT NULL,
-	INDEX USING HASH (`guid_new`),
-	INDEX USING HASH (`guid`)
+	`guid` INT(10) unsigned NOT NULL
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 SET @s = CONCAT('ALTER TABLE `tmp_groups_table` AUTO_INCREMENT = ', @START_GUID_GROUP);
@@ -180,9 +177,7 @@ INSERT INTO `tmp_groups_table` (`guid`) SELECT `guid` FROM `groups`;
 DROP TABLE IF EXISTS `tmp_item_instance_table`;
 CREATE TABLE `tmp_item_instance_table` (
 	`guid_new` INT(10) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	`guid` INT(10) unsigned NOT NULL,
-	INDEX USING HASH (`guid_new`),
-	INDEX USING HASH (`guid`)
+	`guid` INT(10) unsigned NOT NULL
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 SET @s = CONCAT('ALTER TABLE `tmp_item_instance_table` AUTO_INCREMENT = ', @START_GUID_ITEMS);
@@ -196,9 +191,7 @@ INSERT INTO `tmp_item_instance_table` (`guid`) SELECT `guid` FROM `item_instance
 DROP TABLE IF EXISTS `tmp_character_pet_table`;
 CREATE TABLE `tmp_character_pet_table` (
 	`id_new` INT(10) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	`id` INT(10) unsigned NOT NULL,
-	INDEX USING HASH (`id_new`),
-	INDEX USING HASH (`id`)
+	`id` INT(10) unsigned NOT NULL
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 SET @s = CONCAT('ALTER TABLE `tmp_character_pet_table` AUTO_INCREMENT = ', @START_GUID_PETS);
@@ -212,9 +205,7 @@ INSERT INTO `tmp_character_pet_table` (`id`) SELECT `id` FROM `character_pet`;
 DROP TABLE IF EXISTS `tmp_mail_table`;
 CREATE TABLE `tmp_mail_table` (
 	`id_new` INT(10) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	`id` INT(10) unsigned NOT NULL,
-	INDEX USING HASH (`id_new`),
-	INDEX USING HASH (`id`)
+	`id` INT(10) unsigned NOT NULL
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 SET @s = CONCAT('ALTER TABLE `tmp_mail_table` AUTO_INCREMENT = ', @START_GUID_MAILS);
@@ -228,9 +219,7 @@ INSERT INTO `tmp_mail_table` (`id`) SELECT `id` FROM `mail`;
 DROP TABLE IF EXISTS `tmp_character_equipmentsets_table`;
 CREATE TABLE `tmp_character_equipmentsets_table` (
   `setguid_new` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `setguid` bigint(20) NOT NULL,
-	INDEX USING HASH (`setguid_new`),
-	INDEX USING HASH (`setguid`)
+  `setguid` bigint(20) NOT NULL
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 SET @s = CONCAT('ALTER TABLE `tmp_character_equipmentsets_table` AUTO_INCREMENT = ', @START_GUID_EQUIP);

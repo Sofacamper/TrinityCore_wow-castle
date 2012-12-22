@@ -128,3 +128,4 @@ DELETE FROM `item_refund_instance` WHERE `item_guid` NOT IN (SELECT `guid` FROM 
 
 -- CUSTOM - TRINICHAT AUTOINVITE
 -- DELETE FROM `world`.`irc_inchan` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
+-- UPDATE `world`.`irc_inchan` SET `name` = (SELECT `name` FROM `characters` WHERE `characters`.`guid` = `world`.`irc_inchan`.`guid`);
