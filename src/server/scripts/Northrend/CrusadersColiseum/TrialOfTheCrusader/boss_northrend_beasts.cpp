@@ -723,16 +723,6 @@ class boss_acidmaw : public CreatureScript
 
             boss_jormungarAI::Reset();
         }
-
-        void JustDied(Unit* killer)
-        {
-            if (!killer)
-                return;
-
-            HandleAuraOnRaidNorthrendBeasts(me, RAID_MODE(SPELL_PARALYTIC_TOXIN_0, SPELL_PARALYTIC_TOXIN_1, SPELL_PARALYTIC_TOXIN_2, SPELL_PARALYTIC_TOXIN_3), true, false, 0);
-
-            boss_jormungarAI::JustDied(killer);
-        }
     };
 };
 
