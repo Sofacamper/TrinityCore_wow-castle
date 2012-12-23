@@ -197,6 +197,8 @@ struct boss_twin_baseAI : public ScriptedAI
     void Reset()
     {
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
         me->SetReactState(REACT_PASSIVE);
         /* Uncomment this once that they are flying above the ground
         me->SetLevitate(true);
