@@ -1020,7 +1020,7 @@ bool SpellInfo::IsPassiveStackableWithRanks() const
 
 bool SpellInfo::IsMultiSlotAura() const
 {
-    return IsPassive() || Id == 44413;
+    return IsPassive() || Id == 44413 || Id == 66129;
 }
 
 bool SpellInfo::IsDeathPersistent() const

@@ -699,28 +699,12 @@ public:
                 std::list<Creature*> burrowerCreatureList;
                 me->GetCreatureListWithEntryInGrid(burrowerCreatureList, me->GetEntry(), 12.0f);
 
-                bool doCastFrenzy = false;
-
                 if (!burrowerCreatureList.empty())
-                {
                     for (std::list<Creature*>::const_iterator itr = burrowerCreatureList.begin(); itr != burrowerCreatureList.end(); ++itr)
-                    {
                         if (Creature* creature = (*itr))
-                        {
                             if (creature->GetGUID() != me->GetGUID())
-                            {
                                 if (!creature->HasAura(SPELL_SUBMERGE_EFFECT))
-                                {
-                                    doCastFrenzy = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (doCastFrenzy)
-                    me->AddAura(SPELL_SPIDER_FRENZY, me);
+                                    creature->AddAura(SPELL_SPIDER_FRENZY, me);
 
                 m_uiSpiderFrenzyTimer = 2000;
             } else m_uiSpiderFrenzyTimer -= uiDiff;
