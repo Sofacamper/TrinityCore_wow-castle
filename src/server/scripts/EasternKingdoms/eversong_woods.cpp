@@ -444,10 +444,15 @@ public:
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
-        if (quest->GetQuestId() == QUEST_UNEXPECTED_RESULT)
+        if (!(CAST_AI(npc_apprentice_mirveda::npc_apprentice_mirvedaAI, creature->AI())->PlayerGUID))
         {
-            CAST_AI(npc_apprentice_mirveda::npc_apprentice_mirvedaAI, creature->AI())->Summon = true;
-            CAST_AI(npc_apprentice_mirveda::npc_apprentice_mirvedaAI, creature->AI())->PlayerGUID = player->GetGUID();
+            if (quest->GetQuestId() == QUEST_UNEXPECTED_RESULT)
+            {
+                CAST_AI(npc_apprentice_mirveda::npc_apprentice_mirvedaAI, creature->AI())->PlayerGUID = player->GetGUID();
+                creature->SummonCreature(MOB_GHARZUL, 8712.0f, -7123.28f, 35.24f, 4.31691f, TEMPSUMMON_CORPSE_DESPAWN, 4000);
+                creature->SummonCreature(MOB_ANGERSHADE, 8730.74f, -7127.02f, 36.62f, 4.1f, TEMPSUMMON_CORPSE_DESPAWN, 4000);
+                creature->SummonCreature(MOB_ANGERSHADE, 8726.84f, -7147.45f, 35.3f, 3.6f, TEMPSUMMON_CORPSE_DESPAWN, 4000);
+            }
         }
         return true;
     }
@@ -463,7 +468,6 @@ public:
 
         uint32 KillCount;
         uint64 PlayerGUID;
-        bool Summon;
         SummonList Summons;
 
         void Reset()
@@ -471,7 +475,6 @@ public:
             KillCount = 0;
             PlayerGUID = 0;
             Summons.DespawnAll();
-            Summon = false;
         }
 
         void EnterCombat(Unit* /*who*/){}
@@ -486,6 +489,16 @@ public:
         {
             Summons.Despawn(summoned);
             ++KillCount;
+
+            if (KillCount >= 3 && PlayerGUID)
+            {
+                if (Player* player = Unit::GetPlayer(*me, PlayerGUID))
+                {
+                    player->CompleteQuest(QUEST_UNEXPECTED_RESULT);
+                    KillCount = 0;
+                    PlayerGUID = 0;
+                }
+            }
         }
 
         void JustDied(Unit* /*killer*/)
@@ -495,20 +508,7 @@ public:
                     player->FailQuest(QUEST_UNEXPECTED_RESULT);
         }
 
-        void UpdateAI(const uint32 /*diff*/)
-        {
-            if (KillCount >= 3 && PlayerGUID)
-                if (Player* player = Unit::GetPlayer(*me, PlayerGUID))
-                    player->CompleteQuest(QUEST_UNEXPECTED_RESULT);
-
-            if (Summon)
-            {
-                me->SummonCreature(MOB_GHARZUL, 8745, -7134.32f, 35.22f, 0, TEMPSUMMON_CORPSE_DESPAWN, 4000);
-                me->SummonCreature(MOB_ANGERSHADE, 8745, -7134.32f, 35.22f, 0, TEMPSUMMON_CORPSE_DESPAWN, 4000);
-                me->SummonCreature(MOB_ANGERSHADE, 8745, -7134.32f, 35.22f, 0, TEMPSUMMON_CORPSE_DESPAWN, 4000);
-                Summon = false;
-            }
-        }
+        void UpdateAI(const uint32 /*diff*/){}
     };
 };
 
