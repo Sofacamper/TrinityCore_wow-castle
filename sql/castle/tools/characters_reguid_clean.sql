@@ -16,10 +16,10 @@ SET @START_GUID_EQUIP := 1; -- or use MAX(column)+1
 -- REPLACE: `world` with your world database name
 
 -- AUTH SECTION
-DELETE FROM `characters` WHERE `account` NOT IN (SELECT `id` FROM `auth`.`account`);
-DELETE FROM `account_data` WHERE `accountId` NOT IN (SELECT `id` FROM `auth`.`account`);
-DELETE FROM `account_instance_times` WHERE `accountId` NOT IN (SELECT `id` FROM `auth`.`account`);
-DELETE FROM `account_tutorial` WHERE `accountId` NOT IN (SELECT `id` FROM `auth`.`account`);
+DELETE FROM `characters` WHERE `account` NOT IN (SELECT `id` FROM `realmd`.`account`);
+DELETE FROM `account_data` WHERE `accountId` NOT IN (SELECT `id` FROM `realmd`.`account`);
+DELETE FROM `account_instance_times` WHERE `accountId` NOT IN (SELECT `id` FROM `realmd`.`account`);
+DELETE FROM `account_tutorial` WHERE `accountId` NOT IN (SELECT `id` FROM `realmd`.`account`);
 
 -- WORLD SECTION
 DELETE FROM `creature_respawn` WHERE `guid` NOT IN (SELECT `guid` FROM `world`.`creature`);
@@ -126,19 +126,27 @@ DELETE FROM `petition_sign` WHERE `petitionguid` NOT IN (SELECT `petitionguid` F
 DELETE FROM `item_refund_instance` WHERE `item_guid` NOT IN (SELECT `guid` FROM `item_instance`);
 
 -- CUSTOM - ARMORY
--- DELETE FROM `armory_character_stats` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
--- DELETE FROM `armory_game_chart` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
--- DELETE FROM `character_feed_log` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
+/*
+DELETE FROM `armory_character_stats` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
+DELETE FROM `armory_game_chart` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
+DELETE FROM `character_feed_log` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
+*/
 
 -- CUSTOM - LOG
--- DELETE FROM `castle_log` WHERE `player_guid` NOT IN (SELECT `guid` FROM `characters`);
+/*
+DELETE FROM `castle_log` WHERE `player_guid` NOT IN (SELECT `guid` FROM `characters`);
+*/
 
 -- CUSTOM - ANTI-CHEAT BACKLOG
--- DELETE FROM `cheaters` WHERE UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(`last_date`) >= 60 * 60 * 24 * 7 * 4;
+/*
+DELETE FROM `cheaters` WHERE UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(`last_date`) >= 60 * 60 * 24 * 7 * 4;
+*/
 
 -- CUSTOM - TRINICHAT AUTOINVITE
--- DELETE FROM `world`.`irc_inchan` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
--- UPDATE `world`.`irc_inchan` SET `name` = (SELECT `name` FROM `characters` WHERE `characters`.`guid` = `world`.`irc_inchan`.`guid`);
+/*
+DELETE FROM `world`.`irc_inchan` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
+UPDATE `world`.`irc_inchan` SET `name` = (SELECT `name` FROM `characters` WHERE `characters`.`guid` = `world`.`irc_inchan`.`guid`);
+*/
 
 
 
@@ -157,7 +165,7 @@ PREPARE stmt FROM @s;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
-INSERT INTO `tmp_guid_table` (`guid`) SELECT `guid` FROM `characters`;
+INSERT INTO `tmp_guid_table` (`guid`) SELECT `guid` FROM `characters` ORDER BY `guid` ASC;
 
 -- ====== CREATE TEMP TABLE - GROUP GUIDS ======
 DROP TABLE IF EXISTS `tmp_groups_table`;
@@ -171,7 +179,7 @@ PREPARE stmt FROM @s;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
-INSERT INTO `tmp_groups_table` (`guid`) SELECT `guid` FROM `groups`;
+INSERT INTO `tmp_groups_table` (`guid`) SELECT `guid` FROM `groups` ORDER BY `guid` ASC;
 
 -- ====== CREATE TEMP TABLE - ITEM GUIDS ======
 DROP TABLE IF EXISTS `tmp_item_instance_table`;
@@ -185,7 +193,7 @@ PREPARE stmt FROM @s;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
-INSERT INTO `tmp_item_instance_table` (`guid`) SELECT `guid` FROM `item_instance`;
+INSERT INTO `tmp_item_instance_table` (`guid`) SELECT `guid` FROM `item_instance` ORDER BY `guid` ASC;
 
 -- ====== CREATE TEMP TABLE - PET GUIDS ======
 DROP TABLE IF EXISTS `tmp_character_pet_table`;
@@ -199,7 +207,7 @@ PREPARE stmt FROM @s;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
-INSERT INTO `tmp_character_pet_table` (`id`) SELECT `id` FROM `character_pet`;
+INSERT INTO `tmp_character_pet_table` (`id`) SELECT `id` FROM `character_pet` ORDER BY `id` ASC;
 
 -- ====== CREATE TEMP TABLE - MAIL GUIDS ======
 DROP TABLE IF EXISTS `tmp_mail_table`;
@@ -213,7 +221,7 @@ PREPARE stmt FROM @s;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
-INSERT INTO `tmp_mail_table` (`id`) SELECT `id` FROM `mail`;
+INSERT INTO `tmp_mail_table` (`id`) SELECT `id` FROM `mail` ORDER BY `id` ASC;
 
 -- ====== CREATE TEMP TABLE - EQUIP GUIDS ======
 DROP TABLE IF EXISTS `tmp_character_equipmentsets_table`;
@@ -227,7 +235,7 @@ PREPARE stmt FROM @s;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
-INSERT INTO `tmp_character_equipmentsets_table` (`setguid`) SELECT `setguid` FROM `character_equipmentsets`;
+INSERT INTO `tmp_character_equipmentsets_table` (`setguid`) SELECT `setguid` FROM `character_equipmentsets` ORDER BY `setguid` ASC;
 
 
 -- ====== BEGIN PROCESSING - CHAR GUID ======
@@ -236,59 +244,39 @@ INSERT INTO `tmp_character_equipmentsets_table` (`setguid`) SELECT `setguid` FRO
 UPDATE `arena_team` JOIN `tmp_guid_table` ON `arena_team`.`captainGuid` = `tmp_guid_table`.`guid` SET `arena_team`.`captainGuid` = `tmp_guid_table`.`guid_new`;
 
 -- TABLE: arena_team_member
-ALTER TABLE `arena_team_member` DROP PRIMARY KEY;
 UPDATE `arena_team_member` JOIN `tmp_guid_table` ON `arena_team_member`.`guid` = `tmp_guid_table`.`guid` SET `arena_team_member`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `arena_team_member` ADD PRIMARY KEY (`arenaTeamId`, `guid`);
 
 -- TABLE: auctionhouse
 UPDATE `auctionhouse` JOIN `tmp_guid_table` ON `auctionhouse`.`buyguid` = `tmp_guid_table`.`guid` SET `auctionhouse`.`buyguid` = `tmp_guid_table`.`guid_new`;
 UPDATE `auctionhouse` JOIN `tmp_guid_table` ON `auctionhouse`.`itemowner` = `tmp_guid_table`.`guid` SET `auctionhouse`.`itemowner` = `tmp_guid_table`.`guid_new`;
 
 -- TABLE: character_account_data
-ALTER TABLE `character_account_data` DROP PRIMARY KEY;
 UPDATE `character_account_data` JOIN `tmp_guid_table` ON `character_account_data`.`guid` = `tmp_guid_table`.`guid` SET `character_account_data`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_account_data` ADD PRIMARY KEY (`guid`, `type`);
 
 -- TABLE: character_achievement
-ALTER TABLE `character_achievement` DROP PRIMARY KEY;
 UPDATE `character_achievement` JOIN `tmp_guid_table` ON `character_achievement`.`guid` = `tmp_guid_table`.`guid` SET `character_achievement`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_achievement` ADD PRIMARY KEY (`guid`, `achievement`);
 
 -- TABLE: character_achievement_progress
-ALTER TABLE `character_achievement_progress` DROP PRIMARY KEY;
 UPDATE `character_achievement_progress` JOIN `tmp_guid_table` ON `character_achievement_progress`.`guid` = `tmp_guid_table`.`guid` SET `character_achievement_progress`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_achievement_progress` ADD PRIMARY KEY (`guid`, `criteria`);
 
 -- TABLE: character_action
-ALTER TABLE `character_action` DROP PRIMARY KEY;
 UPDATE `character_action` JOIN `tmp_guid_table` ON `character_action`.`guid` = `tmp_guid_table`.`guid` SET `character_action`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_action` ADD PRIMARY KEY (`guid`, `spec`, `button`);
 
 -- TABLE: character_arena_stats
-ALTER TABLE `character_arena_stats` DROP PRIMARY KEY;
 UPDATE `character_arena_stats` JOIN `tmp_guid_table` ON `character_arena_stats`.`guid` = `tmp_guid_table`.`guid` SET `character_arena_stats`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_arena_stats` ADD PRIMARY KEY (`guid`, `slot`);
 
 -- TABLE: character_aura
-ALTER TABLE `character_aura` DROP PRIMARY KEY;
 UPDATE `character_aura` JOIN `tmp_guid_table` ON `character_aura`.`guid` = `tmp_guid_table`.`guid` SET `character_aura`.`guid` = `tmp_guid_table`.`guid_new`;
 UPDATE `character_aura` JOIN `tmp_guid_table` ON `character_aura`.`caster_guid` = `tmp_guid_table`.`guid` SET `character_aura`.`caster_guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_aura` ADD PRIMARY KEY (`guid`, `caster_guid`, `item_guid`, `spell`, `effect_mask`);
 
 -- TABLE: character_banned
-ALTER TABLE `character_banned` DROP PRIMARY KEY;
 UPDATE `character_banned` JOIN `tmp_guid_table` ON `character_banned`.`guid` = `tmp_guid_table`.`guid` SET `character_banned`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_banned` ADD PRIMARY KEY (`guid`, `bandate`);
 
 -- TABLE: character_battleground_data
-ALTER TABLE `character_battleground_data` DROP PRIMARY KEY;
 UPDATE `character_battleground_data` JOIN `tmp_guid_table` ON `character_battleground_data`.`guid` = `tmp_guid_table`.`guid` SET `character_battleground_data`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_battleground_data` ADD PRIMARY KEY (`guid`);
 
 -- TABLE: character_battleground_random
-ALTER TABLE `character_battleground_random` DROP PRIMARY KEY;
 UPDATE `character_battleground_random` JOIN `tmp_guid_table` ON `character_battleground_random`.`guid` = `tmp_guid_table`.`guid` SET `character_battleground_random`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_battleground_random` ADD PRIMARY KEY (`guid`);
 
 -- TABLE: character_equipmentsets
 UPDATE `character_equipmentsets` JOIN `tmp_guid_table` ON `character_equipmentsets`.`guid` = `tmp_guid_table`.`guid` SET `character_equipmentsets`.`guid` = `tmp_guid_table`.`guid_new`;
@@ -297,93 +285,59 @@ UPDATE `character_equipmentsets` JOIN `tmp_guid_table` ON `character_equipmentse
 UPDATE `character_gifts` JOIN `tmp_guid_table` ON `character_gifts`.`guid` = `tmp_guid_table`.`guid` SET `character_gifts`.`guid` = `tmp_guid_table`.`guid_new`;
 
 -- TABLE: character_glyphs
-ALTER TABLE `character_glyphs` DROP PRIMARY KEY;
 UPDATE `character_glyphs` JOIN `tmp_guid_table` ON `character_glyphs`.`guid` = `tmp_guid_table`.`guid` SET `character_glyphs`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_glyphs` ADD PRIMARY KEY (`guid`, `spec`);
 
 -- TABLE: character_homebind
-ALTER TABLE `character_homebind` DROP PRIMARY KEY;
 UPDATE `character_homebind` JOIN `tmp_guid_table` ON `character_homebind`.`guid` = `tmp_guid_table`.`guid` SET `character_homebind`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_homebind` ADD PRIMARY KEY (`guid`);
 
 -- TABLE: character_instance
-ALTER TABLE `character_instance` DROP PRIMARY KEY;
 UPDATE `character_instance` JOIN `tmp_guid_table` ON `character_instance`.`guid` = `tmp_guid_table`.`guid` SET `character_instance`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_instance` ADD PRIMARY KEY (`guid`,`instance`);
 
 -- TABLE: character_inventory
-ALTER TABLE `character_inventory` DROP INDEX `guid`;
 UPDATE `character_inventory` JOIN `tmp_guid_table` ON `character_inventory`.`guid` = `tmp_guid_table`.`guid` SET `character_inventory`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_inventory` ADD UNIQUE INDEX `guid` (`guid`, `bag`, `slot`);
 
 -- TABLE: character_pet
 UPDATE `character_pet` JOIN `tmp_guid_table` ON `character_pet`.`owner` = `tmp_guid_table`.`guid` SET `character_pet`.`owner` = `tmp_guid_table`.`guid_new`;
 
 -- TABLE: character_queststatus
-ALTER TABLE `character_queststatus` DROP PRIMARY KEY;
 UPDATE `character_queststatus` JOIN `tmp_guid_table` ON `character_queststatus`.`guid` = `tmp_guid_table`.`guid` SET `character_queststatus`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_queststatus` ADD PRIMARY KEY (`guid`,`quest`);
 
 -- TABLE: character_queststatus_daily
-ALTER TABLE `character_queststatus_daily` DROP PRIMARY KEY;
 UPDATE `character_queststatus_daily` JOIN `tmp_guid_table` ON `character_queststatus_daily`.`guid` = `tmp_guid_table`.`guid` SET `character_queststatus_daily`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_queststatus_daily` ADD PRIMARY KEY (`guid`,`quest`);
 
 -- TABLE: character_queststatus_rewarded
-ALTER TABLE `character_queststatus_rewarded` DROP PRIMARY KEY;
 UPDATE `character_queststatus_rewarded` JOIN `tmp_guid_table` ON `character_queststatus_rewarded`.`guid` = `tmp_guid_table`.`guid` SET `character_queststatus_rewarded`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_queststatus_rewarded` ADD PRIMARY KEY (`guid`, `quest`);
 
 -- TABLE: character_queststatus_seasonal
-ALTER TABLE `character_queststatus_seasonal` DROP PRIMARY KEY;
 UPDATE `character_queststatus_seasonal` JOIN `tmp_guid_table` ON `character_queststatus_seasonal`.`guid` = `tmp_guid_table`.`guid` SET `character_queststatus_seasonal`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_queststatus_seasonal` ADD PRIMARY KEY (`guid`, `quest`);
 
 -- TABLE: character_queststatus_weekly
-ALTER TABLE `character_queststatus_weekly` DROP PRIMARY KEY;
 UPDATE `character_queststatus_weekly` JOIN `tmp_guid_table` ON `character_queststatus_weekly`.`guid` = `tmp_guid_table`.`guid` SET `character_queststatus_weekly`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_queststatus_weekly` ADD PRIMARY KEY (`guid`, `quest`);
 
 -- TABLE: character_reputation
-ALTER TABLE `character_reputation` DROP PRIMARY KEY;
 UPDATE `character_reputation` JOIN `tmp_guid_table` ON `character_reputation`.`guid` = `tmp_guid_table`.`guid` SET `character_reputation`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_reputation` ADD PRIMARY KEY (`guid`, `faction`);
 
 -- TABLE: character_skills
-ALTER TABLE `character_skills` DROP PRIMARY KEY;
 UPDATE `character_skills` JOIN `tmp_guid_table` ON `character_skills`.`guid` = `tmp_guid_table`.`guid` SET `character_skills`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_skills` ADD PRIMARY KEY (`guid`, `skill`);
 
 -- TABLE: character_social
-ALTER TABLE `character_social` DROP PRIMARY KEY;
 UPDATE `character_social` JOIN `tmp_guid_table` ON `character_social`.`guid` = `tmp_guid_table`.`guid` SET `character_social`.`guid` = `tmp_guid_table`.`guid_new`;
 UPDATE `character_social` JOIN `tmp_guid_table` ON `character_social`.`friend` = `tmp_guid_table`.`guid` SET `character_social`.`friend` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_social` ADD PRIMARY KEY (`guid`, `friend`, `flags`);
 
 -- TABLE: character_spell
-ALTER TABLE `character_spell` DROP PRIMARY KEY;
 UPDATE `character_spell` JOIN `tmp_guid_table` ON `character_spell`.`guid` = `tmp_guid_table`.`guid` SET `character_spell`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_spell` ADD PRIMARY KEY (`guid`, `spell`);
 
 -- TABLE: character_spell_cooldown
-ALTER TABLE `character_spell_cooldown` DROP PRIMARY KEY;
 UPDATE `character_spell_cooldown` JOIN `tmp_guid_table` ON `character_spell_cooldown`.`guid` = `tmp_guid_table`.`guid` SET `character_spell_cooldown`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_spell_cooldown` ADD PRIMARY KEY (`guid`, `spell`);
 
 -- TABLE: character_stats
-ALTER TABLE `character_stats` DROP PRIMARY KEY;
 UPDATE `character_stats` JOIN `tmp_guid_table` ON `character_stats`.`guid` = `tmp_guid_table`.`guid` SET `character_stats`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_stats` ADD PRIMARY KEY (`guid`);
 
 -- TABLE: character_talent
-ALTER TABLE `character_talent` DROP PRIMARY KEY;
 UPDATE `character_talent` JOIN `tmp_guid_table` ON `character_talent`.`guid` = `tmp_guid_table`.`guid` SET `character_talent`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `character_talent` ADD PRIMARY KEY (`guid`, `spell`, `spec`);
 
 -- TABLE: characters
-ALTER TABLE `characters` DROP PRIMARY KEY;
 UPDATE `characters` JOIN `tmp_guid_table` ON `characters`.`guid` = `tmp_guid_table`.`guid` SET `characters`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `characters` ADD PRIMARY KEY (`guid`);
 
 -- TABLE: gm_tickets
 UPDATE `gm_tickets` JOIN `tmp_guid_table` ON `gm_tickets`.`guid` = `tmp_guid_table`.`guid` SET `gm_tickets`.`guid` = `tmp_guid_table`.`guid_new`;
@@ -391,9 +345,7 @@ UPDATE `gm_tickets` JOIN `tmp_guid_table` ON `gm_tickets`.`closedBy` = `tmp_guid
 UPDATE `gm_tickets` JOIN `tmp_guid_table` ON `gm_tickets`.`assignedTo` = `tmp_guid_table`.`guid` SET `gm_tickets`.`assignedTo` = `tmp_guid_table`.`guid_new`;
 
 -- TABLE: group_member
-ALTER TABLE `group_member` DROP PRIMARY KEY;
 UPDATE `group_member` JOIN `tmp_guid_table` ON `group_member`.`memberGuid` = `tmp_guid_table`.`guid` SET `group_member`.`memberGuid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `group_member` ADD PRIMARY KEY (`memberGuid`);
 
 -- TABLE: groups
 UPDATE `groups` JOIN `tmp_guid_table` ON `groups`.`leaderGuid` = `tmp_guid_table`.`guid` SET `groups`.`leaderGuid` = `tmp_guid_table`.`guid_new`;
@@ -410,37 +362,37 @@ UPDATE `guild_eventlog` JOIN `tmp_guid_table` ON `guild_eventlog`.`PlayerGuid1` 
 UPDATE `guild_eventlog` JOIN `tmp_guid_table` ON `guild_eventlog`.`PlayerGuid2` = `tmp_guid_table`.`guid` SET `guild_eventlog`.`PlayerGuid2` = `tmp_guid_table`.`guid_new`;
 
 -- TABLE: guild_member
-ALTER TABLE `guild_member` DROP INDEX `guid_key`;
 UPDATE `guild_member` JOIN `tmp_guid_table` ON `guild_member`.`guid` = `tmp_guid_table`.`guid` SET `guild_member`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `guild_member` ADD UNIQUE INDEX `guid_key`(`guid`);
 
 -- TABLE: item_instance
+-- Add some keys for better performance
+ALTER TABLE `item_instance` ADD INDEX `idx_creator` (`creatorGuid`);
+ALTER TABLE `item_instance` ADD INDEX `idx_gift` (`giftCreatorGuid`);
 UPDATE `item_instance` JOIN `tmp_guid_table` ON `item_instance`.`owner_guid` = `tmp_guid_table`.`guid` SET `item_instance`.`owner_guid` = `tmp_guid_table`.`guid_new`;
 UPDATE `item_instance` JOIN `tmp_guid_table` ON `item_instance`.`creatorGuid` = `tmp_guid_table`.`guid` SET `item_instance`.`creatorGuid` = `tmp_guid_table`.`guid_new`;
 UPDATE `item_instance` JOIN `tmp_guid_table` ON `item_instance`.`giftCreatorGuid` = `tmp_guid_table`.`guid` SET `item_instance`.`giftCreatorGuid` = `tmp_guid_table`.`guid_new`;
+ALTER TABLE `item_instance` DROP INDEX `idx_gift`;
+ALTER TABLE `item_instance` DROP INDEX `idx_creator`;
 
 -- TABLE: item_refund_instance
-ALTER TABLE `item_refund_instance` DROP PRIMARY KEY;
 UPDATE `item_refund_instance` JOIN `tmp_guid_table` ON `item_refund_instance`.`player_guid` = `tmp_guid_table`.`guid` SET `item_refund_instance`.`player_guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `item_refund_instance` ADD PRIMARY KEY (`item_guid`,`player_guid`);
 
 -- TABLE: mail
+-- Add some keys for better performance
+ALTER TABLE `mail` ADD INDEX `idx_sender` (`sender`);
 UPDATE `mail` JOIN `tmp_guid_table` ON `mail`.`sender` = `tmp_guid_table`.`guid` SET `mail`.`sender` = `tmp_guid_table`.`guid_new`;
 UPDATE `mail` JOIN `tmp_guid_table` ON `mail`.`receiver` = `tmp_guid_table`.`guid` SET `mail`.`receiver` = `tmp_guid_table`.`guid_new`;
+ALTER TABLE `mail` DROP INDEX `idx_sender`;
 
 -- TABLE: mail_items
 UPDATE `mail_items` JOIN `tmp_guid_table` ON `mail_items`.`receiver` = `tmp_guid_table`.`guid` SET `mail_items`.`receiver` = `tmp_guid_table`.`guid_new`;
 
 -- TABLE: petition
-ALTER TABLE `petition` DROP PRIMARY KEY;
 UPDATE `petition` JOIN `tmp_guid_table` ON `petition`.`ownerguid` = `tmp_guid_table`.`guid` SET `petition`.`ownerguid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `petition` ADD PRIMARY KEY (`ownerguid`,`type`);
 
 -- TABLE: petition_sign
-ALTER TABLE `petition_sign` DROP PRIMARY KEY;
 UPDATE `petition_sign` JOIN `tmp_guid_table` ON `petition_sign`.`ownerguid` = `tmp_guid_table`.`guid` SET `petition_sign`.`ownerguid` = `tmp_guid_table`.`guid_new`;
 UPDATE `petition_sign` JOIN `tmp_guid_table` ON `petition_sign`.`playerguid` = `tmp_guid_table`.`guid` SET `petition_sign`.`playerguid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `petition_sign` ADD PRIMARY KEY (`petitionguid`,`playerguid`);
 
 
 
@@ -450,99 +402,68 @@ ALTER TABLE `petition_sign` ADD PRIMARY KEY (`petitionguid`,`playerguid`);
 UPDATE `auctionhouse` JOIN `tmp_item_instance_table` ON `auctionhouse`.`itemguid` = `tmp_item_instance_table`.`guid` SET `auctionhouse`.`itemguid` = `tmp_item_instance_table`.`guid_new`;
 
 -- TABLE: character_gifts
-ALTER TABLE `character_gifts` DROP PRIMARY KEY;
 UPDATE `character_gifts` JOIN `tmp_item_instance_table` ON `character_gifts`.`item_guid` = `tmp_item_instance_table`.`guid` SET `character_gifts`.`item_guid` = `tmp_item_instance_table`.`guid_new`;
-ALTER TABLE `character_gifts` ADD PRIMARY KEY (`item_guid`);
 
 -- TABLE: character_inventory
-ALTER TABLE `character_inventory` DROP PRIMARY KEY;
-ALTER TABLE `character_inventory` DROP INDEX `guid`;
+-- Add some keys for better performance
+ALTER TABLE `character_inventory` ADD INDEX `idx_bag` (`bag`);
 UPDATE `character_inventory` JOIN `tmp_item_instance_table` ON `character_inventory`.`item` = `tmp_item_instance_table`.`guid` SET `character_inventory`.`item` = `tmp_item_instance_table`.`guid_new`;
 UPDATE `character_inventory` JOIN `tmp_item_instance_table` ON `character_inventory`.`bag` = `tmp_item_instance_table`.`guid` SET `character_inventory`.`bag` = `tmp_item_instance_table`.`guid_new`;
-ALTER TABLE `character_inventory` ADD UNIQUE INDEX `guid` (`guid`, `bag`, `slot`);
-ALTER TABLE `character_inventory` ADD PRIMARY KEY (`item`);
+ALTER TABLE `character_inventory` DROP INDEX `idx_bag`;
 
 -- TABLE: item_instance
-ALTER TABLE `item_instance` DROP PRIMARY KEY;
 UPDATE `item_instance` JOIN `tmp_item_instance_table` ON `item_instance`.`guid` = `tmp_item_instance_table`.`guid` SET `item_instance`.`guid` = `tmp_item_instance_table`.`guid_new`;
-ALTER TABLE `item_instance` ADD PRIMARY KEY (`guid`);
 
 -- TABLE: item_refund_instance
-ALTER TABLE `item_refund_instance` DROP PRIMARY KEY;
 UPDATE `item_refund_instance` JOIN `tmp_item_instance_table` ON `item_refund_instance`.`item_guid` = `tmp_item_instance_table`.`guid` SET `item_refund_instance`.`item_guid` = `tmp_item_instance_table`.`guid_new`;
-ALTER TABLE `item_refund_instance` ADD PRIMARY KEY (`item_guid`,`player_guid`);
 
 -- TABLE: mail_items
-ALTER TABLE `mail_items` DROP PRIMARY KEY;
 UPDATE `mail_items` JOIN `tmp_item_instance_table` ON `mail_items`.`item_guid` = `tmp_item_instance_table`.`guid` SET `mail_items`.`item_guid` = `tmp_item_instance_table`.`guid_new`;
-ALTER TABLE `mail_items` ADD PRIMARY KEY (`item_guid`);
 
 -- TABLE: petition
 UPDATE `petition`, `tmp_item_instance_table` SET `petition`.`petitionguid` = `tmp_item_instance_table`.`guid` WHERE `petition`.`petitionguid` = `tmp_item_instance_table`.`guid_new`;
 
 -- TABLE: petition_sign
-ALTER TABLE `petition_sign` DROP PRIMARY KEY;
 UPDATE `petition_sign`, `tmp_item_instance_table` SET `petition_sign`.`petitionguid` = `tmp_item_instance_table`.`guid` WHERE `petition_sign`.`petitionguid` = `tmp_item_instance_table`.`guid_new`;
-ALTER TABLE `petition_sign` ADD PRIMARY KEY (`petitionguid`,`playerguid`);
 
 
 
 -- ====== BEGIN PROCESSING - GROUP GUID ======
 
 -- TABLE: group_instance
-ALTER TABLE `group_instance` DROP PRIMARY KEY;
 UPDATE `group_instance` JOIN `tmp_groups_table` ON `group_instance`.`guid` = `tmp_groups_table`.`guid` SET `group_instance`.`guid` = `tmp_groups_table`.`guid_new`;
-ALTER TABLE `group_instance` ADD PRIMARY KEY (`guid`, `instance`);
 
 -- TABLE: group_member
 UPDATE `group_member` JOIN `tmp_groups_table` ON `group_member`.`guid` = `tmp_groups_table`.`guid` SET `group_member`.`guid` = `tmp_groups_table`.`guid_new`;
 
 -- TABLE: groups
-ALTER TABLE `groups` DROP PRIMARY KEY;
 UPDATE `groups` JOIN `tmp_groups_table` ON `groups`.`guid` = `tmp_groups_table`.`guid` SET `groups`.`guid` = `tmp_groups_table`.`guid_new`;
-ALTER TABLE `groups` ADD PRIMARY KEY (`guid`);
 
 -- TABLE: guild_bank_item
-ALTER TABLE `guild_bank_item` DROP PRIMARY KEY;
-ALTER TABLE `guild_bank_item` DROP INDEX `Idx_item_guid`;
-ALTER TABLE `guild_bank_item` DROP INDEX `guildid_key`;
 UPDATE `guild_bank_item` JOIN `tmp_item_instance_table` ON `guild_bank_item`.`item_guid` = `tmp_item_instance_table`.`guid` SET `guild_bank_item`.`item_guid` = `tmp_item_instance_table`.`guid_new`;
-ALTER TABLE `guild_bank_item` ADD INDEX `guildid_key`(`guildid`);
-ALTER TABLE `guild_bank_item` ADD INDEX `Idx_item_guid`(`item_guid`);
-ALTER TABLE `guild_bank_item` ADD PRIMARY KEY (`guildid`,`TabId`,`SlotId`);
 
 
 
 -- ====== BEGIN PROCESSING - PET GUID ======
 
 -- TABLE: character_pet
-ALTER TABLE `character_pet` DROP PRIMARY KEY;
 UPDATE `character_pet` JOIN `tmp_character_pet_table` ON `character_pet`.`id` = `tmp_character_pet_table`.`id` SET `character_pet`.`id` = `tmp_character_pet_table`.`id_new`;
-ALTER TABLE `character_pet` ADD PRIMARY KEY (`id`);
 
 -- TABLE: pet_aura
-ALTER TABLE `pet_aura` DROP PRIMARY KEY;
 UPDATE `pet_aura` JOIN `tmp_character_pet_table` ON `pet_aura`.`guid` = `tmp_character_pet_table`.`id` SET `pet_aura`.`guid` = `tmp_character_pet_table`.`id_new`;
-ALTER TABLE `pet_aura` ADD PRIMARY KEY (`guid`,`spell`,`effect_mask`);
 
 -- TABLE: pet_spell
-ALTER TABLE `pet_spell` DROP PRIMARY KEY;
 UPDATE `pet_spell` JOIN `tmp_character_pet_table` ON `pet_spell`.`guid` = `tmp_character_pet_table`.`id` SET `pet_spell`.`guid` = `tmp_character_pet_table`.`id_new`;
-ALTER TABLE `pet_spell` ADD PRIMARY KEY (`guid`,`spell`);
 
 -- TABLE: pet_spell_cooldown
-ALTER TABLE `pet_spell_cooldown` DROP PRIMARY KEY;
 UPDATE `pet_spell_cooldown` JOIN `tmp_character_pet_table` ON `pet_spell_cooldown`.`guid` = `tmp_character_pet_table`.`id` SET `pet_spell_cooldown`.`guid` = `tmp_character_pet_table`.`id_new`;
-ALTER TABLE `pet_spell_cooldown` ADD PRIMARY KEY (`guid`,`spell`);
 
 
 
 -- ====== BEGIN PROCESSING - MAIL GUID ======
 
 -- TABLE: mail
-ALTER TABLE `mail` DROP PRIMARY KEY;
 UPDATE `mail` JOIN `tmp_mail_table` ON `mail`.`id` = `tmp_mail_table`.`id` SET `mail`.`id` = `tmp_mail_table`.`id_new`;
-ALTER TABLE `mail` ADD PRIMARY KEY (`id`);
 
 -- TABLE: mail_items
 UPDATE `mail_items` JOIN `tmp_mail_table` ON `mail_items`.`mail_id` = `tmp_mail_table`.`id` SET `mail_items`.`mail_id` = `tmp_mail_table`.`id_new`;
@@ -552,15 +473,7 @@ UPDATE `mail_items` JOIN `tmp_mail_table` ON `mail_items`.`mail_id` = `tmp_mail_
 -- ====== BEGIN PROCESSING - EQUIP GUID ======
 
 -- TABLE: character_equipmentsets
-ALTER TABLE `character_equipmentsets` DROP INDEX `idx_set`;
-ALTER TABLE `character_equipmentsets` DROP INDEX `Idx_setindex`;
-ALTER TABLE `character_equipmentsets` CHANGE `setguid` `setguid` bigint(20) NOT NULL;
-ALTER TABLE `character_equipmentsets` DROP PRIMARY KEY;
 UPDATE `character_equipmentsets` JOIN `tmp_character_equipmentsets_table` ON `character_equipmentsets`.`setguid` = `tmp_character_equipmentsets_table`.`setguid` SET `character_equipmentsets`.`setguid` = `tmp_character_equipmentsets_table`.`setguid_new`;
-ALTER TABLE `character_equipmentsets` ADD PRIMARY KEY (`setguid`);
-ALTER TABLE `character_equipmentsets` CHANGE `setguid` `setguid` bigint(20) NOT NULL AUTO_INCREMENT;
-ALTER TABLE `character_equipmentsets` ADD INDEX `Idx_setindex` (`setindex`);
-ALTER TABLE `character_equipmentsets` ADD UNIQUE INDEX `idx_set` (`guid`,`setguid`,`setindex`);
 
 
 -- ====== BEGIN PROCESSING - AUTO_INCREMENT VALUES ======
@@ -578,33 +491,33 @@ DEALLOCATE PREPARE stmt;
 
 -- TABLE: armory_character_stats (CUSTOM - ARMORY)
 /*
-ALTER TABLE `armory_character_stats` DROP PRIMARY KEY;
-UPDATE `armory_character_stats` JOIN `tmp_guid_table` ON `armory_character_stats`.`guid` = `tmp_guid_table`.`guid` SET `armory_character_stats`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `armory_character_stats` ADD PRIMARY KEY (`guid`);
+UPDATE `armory_character_stats` JOIN `tmp_guid_table` ON `armory_character_stats`.`guid` = `tmp_guid_table`.`guid` SET `armory_character_stats`.`guid` = `tmp_guid_table`.`guid_new`, `armory_character_stats`.`data` = CONCAT(`tmp_guid_table`.`guid_new`, SUBSTRING(`armory_character_stats`.`data`, LOCATE(' ', `armory_character_stats`.`data`)));
 */
 
 -- TABLE: armory_game_chart (CUSTOM - ARMORY)
 /*
-ALTER TABLE `armory_game_chart` DROP PRIMARY KEY;
 UPDATE `armory_game_chart` JOIN `tmp_guid_table` ON `armory_game_chart`.`guid` = `tmp_guid_table`.`guid` SET `armory_game_chart`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `armory_game_chart` ADD PRIMARY KEY (`gameid`, `teamid`, `guid`);
 */
 
 -- TABLE: castle_log (CUSTOM - LOG)
+-- Add some keys for better performance
 /*
+ALTER TABLE `castle_log` ADD INDEX `idx_guid` (`player_guid`);
 UPDATE `castle_log` JOIN `tmp_guid_table` ON `castle_log`.`player_guid` = `tmp_guid_table`.`guid` SET `castle_log`.`player_guid` = `tmp_guid_table`.`guid_new`;
+ALTER TABLE `castle_log` DROP INDEX `idx_guid`;
 */
 
 -- TABLE: character_feed_log (CUSTOM - ARMORY)
+-- Add some keys for better performance
 /*
+ALTER TABLE `character_feed_log` ADD INDEX `idx_guid` (`guid`);
 UPDATE `character_feed_log` JOIN `tmp_guid_table` ON `character_feed_log`.`guid` = `tmp_guid_table`.`guid` SET `character_feed_log`.`guid` = `tmp_guid_table`.`guid_new`;
+ALTER TABLE `character_feed_log` DROP INDEX `idx_guid`;
 */
 
 -- TABLE: world.irc_inchan (CUSTOM - TRINICHAT AUTOINVITE)
 /*
-ALTER TABLE `world`.`irc_inchan` DROP PRIMARY KEY;
 UPDATE `world`.`irc_inchan` JOIN `tmp_guid_table` ON `world`.`irc_inchan`.`guid` = `tmp_guid_table`.`guid` SET `world`.`irc_inchan`.`guid` = `tmp_guid_table`.`guid_new`;
-ALTER TABLE `world`.`irc_inchan` ADD PRIMARY KEY (`guid`,`channel`);
 */
 
 
@@ -612,13 +525,19 @@ ALTER TABLE `world`.`irc_inchan` ADD PRIMARY KEY (`guid`,`channel`);
 -- ====== CUSTOM - ITEM GUID ======
 
 -- TABLE: castle_log (CUSTOM - LOG)
+-- Add some keys for better performance
 /*
+ALTER TABLE `castle_log` ADD INDEX `idx_data` (`data2`);
 UPDATE `castle_log` JOIN `tmp_item_instance_table` ON `castle_log`.`data2` = `tmp_item_instance_table`.`guid` SET `castle_log`.`data2` = `tmp_item_instance_table`.`guid_new` WHERE `castle_log`.`type` = 2;
+ALTER TABLE `castle_log` DROP INDEX `idx_data`;
 */
 
 -- TABLE: character_feed_log (CUSTOM - ARMORY)
+-- Add some keys for better performance
 /*
+ALTER TABLE `character_feed_log` ADD INDEX `idx_item` (`item_guid`);
 UPDATE `character_feed_log` JOIN `tmp_item_instance_table` ON `character_feed_log`.`item_guid` = `tmp_item_instance_table`.`guid` SET `character_feed_log`.`item_guid` = `tmp_item_instance_table`.`guid_new`;
+ALTER TABLE `character_feed_log` DROP INDEX `idx_item`;
 */
 
 
@@ -630,6 +549,7 @@ UPDATE `character_feed_log` JOIN `tmp_item_instance_table` ON `character_feed_lo
 SELECT MIN(`entry`) FROM `cheaters` INTO @CHEATERS_MIN;
 UPDATE `cheaters` SET `entry` = `entry` - (@CHEATERS_MIN - 1) ORDER BY `entry` ASC;
 SELECT MAX(`entry`)+1 FROM `cheaters` INTO @CHEATERS_MAX;
+SET @CHEATERS_MAX = IFNULL(@CHEATERS_MAX, 1);
 SET @s = CONCAT('ALTER TABLE `cheaters` AUTO_INCREMENT = ', @CHEATERS_MAX);
 PREPARE stmt FROM @s;
 EXECUTE stmt;
