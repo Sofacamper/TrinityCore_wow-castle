@@ -465,7 +465,7 @@ void WorldSession::HandleTogglePvP(WorldPacket & recv_data)
     // Castle Wintergrasp PvP Trigger nearby will handle pvp state automatically
     if (GetPlayer())
         if (GetPlayer()->GetZoneId() == 4197 && GetPlayer()->GetAreaId() == 4575 && GetPlayer()->GetPositionX() >= 5399.0f)
-            if (GetPlayer()->FindNearestCreature(50050, 50.0f, true))
+            if (GetPlayer()->FindNearestCreature(50050, 60.0f, true))
                 return;
 
     // this opcode can be used in two ways: Either set explicit new status or toggle old status

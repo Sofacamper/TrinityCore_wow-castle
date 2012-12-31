@@ -3446,7 +3446,7 @@ public:
 
                 if (pvpWG)
                 {
-                    float radius = 50.0f;
+                    float radius = 60.0f;
                     std::list<Player*> players;
                     Trinity::AnyPlayerInObjectRangeCheck checker(me, radius, true);
                     Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
