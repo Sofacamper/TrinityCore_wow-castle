@@ -59,6 +59,9 @@ EndContentData */
 #include "CellImpl.h"
 #include "SpellAuras.h"
 
+#include "OutdoorPvPWG.h"
+#include "OutdoorPvPMgr.h"
+
 /*########
 # npc_air_force_bots
 #########*/
@@ -3403,6 +3406,87 @@ public:
     }
 };
 
+/*#####
+# npc_wintergrasp_pvp
+#####*/
+
+class npc_wintergrasp_pvp : public CreatureScript
+{
+public:
+    npc_wintergrasp_pvp() : CreatureScript("npc_wintergrasp_pvp") { }
+
+    struct npc_wintergrasp_pvpAI : public ScriptedAI
+    {
+        npc_wintergrasp_pvpAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        void Reset()
+        {
+            _checkTimer = 500;
+        }
+
+        void MoveInLineOfSight(Unit* /*who*/)
+        {
+        }
+
+        void AttackStart(Unit* /*who*/)
+        {
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (_checkTimer <= diff)
+            {
+                OutdoorPvPWG* pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
+
+                if (pvpWG)
+                {
+                    float radius = 50.0f;
+                    std::list<Player*> players;
+                    Trinity::AnyPlayerInObjectRangeCheck checker(me, radius, true);
+                    Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
+                    me->VisitNearbyWorldObject(radius, searcher);
+
+                    if (!players.empty())
+                    {
+                        for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                        {
+                            if ((*itr))
+                            {
+                                if (pvpWG->isWarTime())
+                                {
+                                    if ((*itr)->GetPositionX() >= 5399.0f && !(*itr)->IsPvP())
+                                        (*itr)->UpdatePvP(true, true);
+                                }
+                                else
+                                {
+                                    if ((*itr)->GetPositionX() >= 5399.0f && (*itr)->IsPvP())
+                                        (*itr)->UpdatePvP(false, true);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                _checkTimer = 500;
+            } else _checkTimer -= diff;
+        }
+
+    private:
+        uint32 _checkTimer;
+    };
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new npc_wintergrasp_pvpAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -3437,4 +3521,5 @@ void AddSC_npcs_special()
     new npc_generic_harpoon_cannon();
     new npc_lvl60();
     new npc_pet_argent_squire();
+    new npc_wintergrasp_pvp();
 }
