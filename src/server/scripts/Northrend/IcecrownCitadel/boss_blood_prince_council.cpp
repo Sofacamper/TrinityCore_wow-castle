@@ -1324,8 +1324,19 @@ class npc_kinetic_bomb : public CreatureScript
                 else if (action == ACTION_KINETIC_BOMB_JUMP)
                 {
                     me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MoveJump(_x, _y, me->GetPositionZ() + 7.0f, 1.0f, 7.0f);
-                    _events.ScheduleEvent(EVENT_CONTINUE_FALLING, 700);
+                    me->GetMotionMaster()->MoveJump(_x, _y, 384.0f, 1.0f, 16.0f, 2);
+                }
+            }
+
+            void MovementInform(uint32 type, uint32 point)
+            {
+                if (type != EFFECT_MOTION_TYPE)
+                    return;
+
+                if (point == 2)
+                {
+                    _events.CancelEvent(EVENT_CONTINUE_FALLING);
+                    _events.ScheduleEvent(EVENT_CONTINUE_FALLING, 100);
                 }
             }
 
