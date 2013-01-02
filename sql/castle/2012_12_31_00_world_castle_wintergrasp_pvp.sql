@@ -4,4 +4,4 @@ INSERT INTO `creature_template` (entry, difficulty_entry_1, difficulty_entry_2, 
 (50050, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Castle Wintergrasp PvP Trigger', '', '', 0, 80, 80, 0, 14, 14, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 33554434, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_wintergrasp_pvp', 1);
 DELETE FROM `creature` WHERE `id` = 50050;
 INSERT INTO `creature` (id, map, spawnMask, phaseMask, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, dynamicflags) VALUES
-(50050, 571, 1, 1, 0, 0, 5447.74, 2841.2, 420.428, 0.00284817, 300, 0, 0, 5342, 0, 0, 0, 0, 0);
+(50050, 571, 1, 1, 0, 0, 5407.95, 2841.31, 418.675, 6.24636, 300, 0, 0, 5342, 0, 0, 0, 0, 0);
