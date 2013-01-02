@@ -228,7 +228,7 @@ class boss_rotface : public CreatureScript
                             if (!target)
                                 target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -MUTATED_INFECTION);
                             if (target)
-                                me->AddAura(MUTATED_INFECTION, target);
+                                target->AddAura(MUTATED_INFECTION, target);
 
                             events.ScheduleEvent(EVENT_MUTATED_INFECTION, infectionCooldown);
                             break;
