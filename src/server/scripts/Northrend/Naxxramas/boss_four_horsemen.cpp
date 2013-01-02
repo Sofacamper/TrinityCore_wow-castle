@@ -291,7 +291,7 @@ public:
             if (me->getVictim() && me->GetDistanceOrder(who, me->getVictim()) && me->IsValidAttackTarget(who))
             {
                 me->getThreatManager().modifyThreatPercent(me->getVictim(), -100);
-                me->AddThreat(who, 1000000.0f);
+                me->AddThreat(who, 50000000.0f);
             }
         }
 

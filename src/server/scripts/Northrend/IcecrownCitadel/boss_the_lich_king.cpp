@@ -3044,7 +3044,7 @@ class spell_the_lich_king_vile_spirit_move_target_search : public SpellScriptLoa
                     return;
 
                 GetCaster()->ToCreature()->AI()->AttackStart(GetHitUnit());
-                GetCaster()->AddThreat(GetHitUnit(), 100000.0f);
+                GetCaster()->AddThreat(GetHitUnit(), 50000000.0f);
             }
 
             void Register()

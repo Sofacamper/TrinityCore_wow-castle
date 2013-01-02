@@ -850,7 +850,7 @@ public:
             if (!who)
                 return;
 
-            me->AddThreat(who, 5000000.0f);
+            me->AddThreat(who, 50000000.0f);
             m_uiTargetGUID = who->GetGUID();
             DoCast(me, SPELL_SPIKE_TRAIL, true);
             Talk(EMOTE_SPIKE, who->GetGUID());
@@ -906,7 +906,7 @@ public:
                     if (!me->getVictim())
                     {
                         AttackStart(target);
-                        me->AddThreat(target, 5000000.0f);
+                        me->AddThreat(target, 50000000.0f);
                     }
                 }
             }

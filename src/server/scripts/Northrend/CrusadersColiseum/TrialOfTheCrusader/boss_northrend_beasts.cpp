@@ -428,7 +428,7 @@ public:
 
             UnitAI::AttackStart(who);
             m_uiTargetGUID = who->GetGUID();
-            me->AddThreat(who, 5000000.0f);
+            me->AddThreat(who, 50000000.0f);
         }
 
         void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
