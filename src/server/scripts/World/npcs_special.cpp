@@ -3446,7 +3446,7 @@ public:
 
                 if (pvpWG)
                 {
-                    float radius = 60.0f;
+                    float radius = 80.0f;
                     std::list<Player*> players;
                     Trinity::AnyPlayerInObjectRangeCheck checker(me, radius, true);
                     Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
@@ -3460,13 +3460,19 @@ public:
                             {
                                 if (pvpWG->isWarTime())
                                 {
-                                    if ((*itr)->GetPositionX() >= 5399.0f && !(*itr)->IsPvP())
+                                    if (!(*itr)->IsPvP())
                                         (*itr)->UpdatePvP(true, true);
                                 }
                                 else
                                 {
-                                    if ((*itr)->GetPositionX() >= 5399.0f && (*itr)->IsPvP())
+                                    // No need for re-activating pvp flag if area is left, core does that already
+                                    if ((*itr)->GetPositionX() >= 5370.0f && (*itr)->IsPvP() && !(*itr)->isAttackingPlayer())
                                         (*itr)->UpdatePvP(false, true);
+
+                                    // Core bug, attacker can still auto-hit victim, if attacker did not change target and victim enters pvp free zone
+                                    if ((*itr)->getVictim())
+                                        if ((*itr)->getVictim()->GetTypeId() == TYPEID_PLAYER && !(*itr)->getVictim()->IsPvP())
+                                            (*itr)->AttackStop();
                                 }
                             }
                         }
