@@ -27,10 +27,20 @@ INSERT INTO `spell_script_names` (spell_id, ScriptName) VALUES
 (72464, 'spell_putricide_mutated_plague_effect'),
 (72506, 'spell_putricide_mutated_plague_effect'),
 (70701, 'spell_putricide_expunged_gas'),
-(70346,'spell_putricide_slime_puddle'),
-(72456,'spell_putricide_slime_puddle'),
-(72868,'spell_putricide_slime_puddle_aura'),
-(72869,'spell_putricide_slime_puddle_aura');
+(70346, 'spell_putricide_slime_puddle'),
+(72456, 'spell_putricide_slime_puddle'),
+(72868, 'spell_putricide_slime_puddle_aura'),
+(72869, 'spell_putricide_slime_puddle_aura');
+DELETE FROM `spell_script_names` WHERE spell_id IN (71278, 72460, 72619, 72620, 71279, 72459, 72621, 72622);
+INSERT INTO `spell_script_names` (spell_id, ScriptName) VALUES
+(71278, 'spell_putricide_choking_gas_bomb_effect'),
+(72460, 'spell_putricide_choking_gas_bomb_effect'),
+(72619, 'spell_putricide_choking_gas_bomb_effect'),
+(72620, 'spell_putricide_choking_gas_bomb_effect'),
+(71279, 'spell_putricide_choking_gas_bomb_effect'),
+(72459, 'spell_putricide_choking_gas_bomb_effect'),
+(72621, 'spell_putricide_choking_gas_bomb_effect'),
+(72622, 'spell_putricide_choking_gas_bomb_effect');
 UPDATE `creature_template` SET `scale` = 1 WHERE `entry` = 37690; -- Growing Ooze Puddle
 */
 
@@ -629,8 +639,20 @@ class boss_professor_putricide : public CreatureScript
                             EnterEvadeMode();
                             break;
                         case EVENT_ROTFACE_VILE_GAS:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
-                                DoCast(target, SPELL_VILE_GAS_H, true); // triggered, to skip LoS check
+                            // Taken from Festergut
+                            if (Creature* rotface = Unit::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
+                            {
+                                std::list<Unit*> targets;
+                                uint32 minTargets = RAID_MODE<uint32>(3, 8, 3, 8);
+                                rotface->AI()->SelectTargetList(targets, minTargets, SELECT_TARGET_RANDOM, -5.0f, true);
+                                float minDist = 0.0f;
+                                if (targets.size() >= minTargets)
+                                    minDist = -5.0f;
+
+                                if (Unit* target = rotface->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, minDist, true))
+                                    DoCast(target, SPELL_VILE_GAS_H, true); // triggered, to skip LoS check
+                            }
+
                             events.ScheduleEvent(EVENT_ROTFACE_VILE_GAS, urand(15000, 20000), 0, PHASE_ROTFACE);
                             break;
                         case EVENT_ROTFACE_OOZE_FLOOD:
@@ -822,9 +844,9 @@ class npc_putricide_ooze : public CreatureScript
 
                 // Lock threat to the target of spell selection
                 // Prevent error message on first attack here
-                me->AddThreat(who, 500000.0f);
+                me->AddThreat(who, 50000000.0f);
                 DoResetThreat();
-                me->AddThreat(who, 500000.0f);
+                me->AddThreat(who, 50000000.0f);
 
                 UnitAI::AttackStart(who);
 
@@ -1339,6 +1361,33 @@ class spell_putricide_choking_gas_bomb : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_putricide_choking_gas_bomb_SpellScript();
+        }
+};
+
+class spell_putricide_choking_gas_bomb_effect : public SpellScriptLoader
+{
+    public:
+        spell_putricide_choking_gas_bomb_effect() : SpellScriptLoader("spell_putricide_choking_gas_bomb_effect") { }
+
+        class spell_putricide_choking_gas_bomb_effect_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_putricide_choking_gas_bomb_effect_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& targets)
+            {
+                targets.remove_if(Trinity::UnitAuraCheck(true, VEHICLE_SPELL_RIDE_HARDCODED));
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_putricide_choking_gas_bomb_effect_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_putricide_choking_gas_bomb_effect_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_putricide_choking_gas_bomb_effect_SpellScript();
         }
 };
 
@@ -1907,4 +1956,5 @@ void AddSC_boss_professor_putricide()
     new spell_putricide_clear_aura_effect_value();
     new spell_stinky_precious_decimate();
     new spell_putricide_mutated_plague_effect();
+    new spell_putricide_choking_gas_bomb_effect();
 }
