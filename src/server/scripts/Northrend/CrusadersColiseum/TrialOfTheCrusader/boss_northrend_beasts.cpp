@@ -262,11 +262,8 @@ public:
 
                     DoZoneInCombat(summon);
 
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                    {
-                        if (summon->AI())
-                            summon->AI()->AttackStart(target);
-                    }
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
+                        summon->AddThreat(target, 50000000.0f);
 
                     if (me->HasAura(SPELL_RISING_ANGER))
                     {
@@ -421,16 +418,6 @@ public:
             Summons.Despawn(summon);
         }
 
-        void AttackStart(Unit* who)
-        {
-            if (!who)
-                return;
-
-            UnitAI::AttackStart(who);
-            m_uiTargetGUID = who->GetGUID();
-            me->AddThreat(who, 50000000.0f);
-        }
-
         void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
         {
             if (pDoneBy->GetGUID() == m_uiTargetGUID)
@@ -455,10 +442,21 @@ public:
             if (!UpdateVictim())
                 return;
 
+            if (!m_uiTargetGUID && me->getVictim())
+                m_uiTargetGUID = me->getVictim()->GetGUID();
+
             if (Unit* target = Unit::GetUnit(*me, m_uiTargetGUID))
+            {
                 if (!target->isAlive() || me->getVictim() != target || target->GetTypeId() != TYPEID_PLAYER)
-                    if (Unit* pNewTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        AttackStart(pNewTarget);
+                {
+                    if (Unit* newTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                    {
+                        DoResetThreat();
+                        me->AddThreat(newTarget, 50000000.0f);
+                        m_uiTargetGUID = newTarget->GetGUID();
+                    }
+                }
+            }
 
             if (m_uiFireBombTimer < diff)
             {
