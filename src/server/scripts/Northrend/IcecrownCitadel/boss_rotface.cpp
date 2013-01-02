@@ -266,6 +266,7 @@ class npc_little_ooze : public CreatureScript
 
             void IsSummonedBy(Unit* summoner)
             {
+                DoZoneInCombat(me, 100.0f);
                 DoCast(me, SPELL_LITTLE_OOZE_COMBINE, true);
                 DoCast(me, SPELL_WEAK_RADIATING_OOZE, true);
                 events.ScheduleEvent(EVENT_STICKY_OOZE, 5000);
