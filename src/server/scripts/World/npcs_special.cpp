@@ -2989,9 +2989,6 @@ public:
 # npc_lvl60
 #####*/
 
-#define VOTEPOINTS_LVLUP_COST_SCALING   0.15
-#define VOTEPOINTS_LVLUP_MAX_LEVEL      60
-
 enum lvl60gossip
 {
     LEVELUP_1       = GOSSIP_ACTION_INFO_DEF + 1,
@@ -3005,12 +3002,63 @@ class npc_lvl60 : public CreatureScript
 public:
     npc_lvl60() : CreatureScript("npc_lvl60") { }
 
+    uint32 getVotepointCost(uint32 playerLevel, uint32 levelupValue)
+    {
+        if (playerLevel >= 30 && playerLevel < 40)
+        {
+            switch (levelupValue)
+            {
+                case 1:
+                    return 5;
+                case 3:
+                    return 12;
+                case 5:
+                    return 17;
+                case 10:
+                    return 30;
+            }
+        }
+        else if (playerLevel >= 40 && playerLevel < 50)
+        {
+            switch (levelupValue)
+            {
+                case 1:
+                    return 7;
+                case 3:
+                    return 18;
+                case 5:
+                    return 26;
+                case 10:
+                    return 45;
+            }
+        }
+        else if (playerLevel >= 50 && playerLevel < 60)
+        {
+            switch (levelupValue)
+            {
+                case 1:
+                    return 9;
+                case 3:
+                    return 24;
+                case 5:
+                    return 35;
+                case 10:
+                    return 60;
+            }
+        }
+
+        return 0;
+    }
+
     bool OnGossipHello(Player* player, Creature* creature)
     {
+        // Initialize variables
         uint32 playerLevel = player->getLevel();
+        uint32 playerLevelModuloInverse = 10 - (playerLevel % 10);
         uint32 playerAccountId = player->GetSession()->GetAccountId();
         uint32 playerVotepoints = 0;
 
+        // Just allow script to run if player is in correct level range
         if (playerLevel >= 60 || playerLevel < 30)
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Du bist nicht zwischen Level 30 und 60 und kannst mich daher nicht benutzen!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
@@ -3035,13 +3083,26 @@ public:
             return true;
         }
 
-        // Store player votepoints
+        // Try to store player votepoints
         Field* fields = result->Fetch();
-        playerVotepoints = fields[0].GetUInt32();
+        playerVotepoints = uint32(fields[0].GetUInt16());
+
+        // Votepoint costs
+        uint32 levelup_cost_1 = getVotepointCost(playerLevel, 1);
+        uint32 levelup_cost_3 = getVotepointCost(playerLevel, 3);
+        uint32 levelup_cost_5 = getVotepointCost(playerLevel, 5);
+        uint32 levelup_cost_10 = getVotepointCost(playerLevel, 10);
+
+        // Skip if not enough votepoints for at least one level
+        if (levelup_cost_1 && playerVotepoints < levelup_cost_1)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Auf diesem Konto sind nicht genuegend Votepunkte vorhanden.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
+            player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
+            return true;
+        }
 
         // Everything seems to be correct here, generate gossip menu matching to level
-        uint32 levelup_cost_1 = (playerLevel + 1) * VOTEPOINTS_LVLUP_COST_SCALING;
-        if (playerVotepoints >= levelup_cost_1)
+        if (levelup_cost_1 && playerVotepoints >= levelup_cost_1 && playerLevelModuloInverse >= 1)
         {
             char buffer[40];
             sprintf(buffer, "1 Level kaufen - %d Punkte", levelup_cost_1);
@@ -3049,8 +3110,7 @@ public:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, message, GOSSIP_SENDER_MAIN, LEVELUP_1);
         }
 
-        uint32 levelup_cost_3 = ((playerLevel * 3 + 6) / 3) * VOTEPOINTS_LVLUP_COST_SCALING * 3;
-        if (playerVotepoints >= levelup_cost_3 && playerLevel <= 57)
+        if (levelup_cost_3 && playerVotepoints >= levelup_cost_3 && playerLevelModuloInverse >= 3)
         {
             char buffer[40];
             sprintf(buffer, "3 Level kaufen - %d Punkte", levelup_cost_3);
@@ -3058,8 +3118,7 @@ public:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, message, GOSSIP_SENDER_MAIN, LEVELUP_3);
         }
 
-        uint32 levelup_cost_5 = ((playerLevel * 5 + 15) / 5) * VOTEPOINTS_LVLUP_COST_SCALING * 3;
-        if (playerVotepoints >= levelup_cost_5 && playerLevel <= 55)
+        if (levelup_cost_5 && playerVotepoints >= levelup_cost_5 && playerLevelModuloInverse >= 5)
         {
             char buffer[40];
             sprintf(buffer, "5 Level kaufen - %d Punkte", levelup_cost_5);
@@ -3067,8 +3126,7 @@ public:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, message, GOSSIP_SENDER_MAIN, LEVELUP_5);
         }
 
-        uint32 levelup_cost_10 = ((playerLevel * 10 + 55) / 10) * VOTEPOINTS_LVLUP_COST_SCALING * 3;
-        if (playerVotepoints >= levelup_cost_10 && playerLevel <= 50)
+        if (levelup_cost_10 && playerVotepoints >= levelup_cost_10 && playerLevelModuloInverse >= 10)
         {
             char buffer[40];
             sprintf(buffer, "10 Level kaufen - %d Punkte", levelup_cost_10);
@@ -3076,16 +3134,21 @@ public:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, message, GOSSIP_SENDER_MAIN, LEVELUP_10);
         }
 
+        // Send abort message, so script will not automatically select one levelup if no other options available
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Abbrechen", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
+
         player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
         return true;
     }
 
     bool OnGossipSelect(Player* player, Creature* creature, uint32 uiSender, uint32 uiAction)
     {
+        // Initialize variables
         uint32 playerLevel = player->getLevel();
         uint32 playerAccountId = player->GetSession()->GetAccountId();
         uint32 playerVotepoints = 0;
 
+        // Just allow script to run if player is in correct level range
         if (playerLevel >= 60 || playerLevel < 30)
         {
             player->CLOSE_GOSSIP_MENU();
@@ -3109,83 +3172,72 @@ public:
 
         // Store player votepoints
         Field* fields = result->Fetch();
-        playerVotepoints = fields[0].GetUInt32();
-        uint32 skill_increase = 0;
-        uint32 cost;
+        playerVotepoints = uint32(fields[0].GetUInt16());
+
+        // Calculate more variables
+        uint32 levelUpChosen = 0;
 
         switch (uiAction)
         {
             case LEVELUP_1:
-                cost = (playerLevel + 1) * VOTEPOINTS_LVLUP_COST_SCALING;
-                if (playerVotepoints >= cost)
-                {
-                    QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", cost, playerAccountId);
-                    sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s set level from %d to %d for %u voteshop points.", player->GetName(), playerLevel, playerLevel + 1, cost);
-                    skill_increase = 5;
-                    player->GiveLevel(playerLevel + 1);
-                }
+                levelUpChosen = 1;
                 break;
             case LEVELUP_3:
-                cost = ((playerLevel * 3 + 6) / 3) * VOTEPOINTS_LVLUP_COST_SCALING * 3;
-                if (playerVotepoints >= cost)
-                {
-                    QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", cost, playerAccountId);
-                    sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s set level from %d to %d for %u voteshop points.", player->GetName(), playerLevel, playerLevel + 3, cost);
-                    skill_increase = 15;
-                    player->GiveLevel(playerLevel + 3);
-                }
+                levelUpChosen = 3;
                 break;
             case LEVELUP_5:
-                cost = ((playerLevel * 5 + 15) / 5) * VOTEPOINTS_LVLUP_COST_SCALING * 3;
-                if (playerVotepoints >= cost)
-                {
-                    QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", cost, playerAccountId);
-                    sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s set level from %d to %d for %u voteshop points.", player->GetName(), playerLevel, playerLevel + 5, cost);
-                    skill_increase = 25;
-                    player->GiveLevel(playerLevel + 5);
-                }
+                levelUpChosen = 5;
                 break;
             case LEVELUP_10:
-                cost = ((playerLevel * 10 + 55) / 10) * VOTEPOINTS_LVLUP_COST_SCALING * 3;
-                if (playerVotepoints >= cost)
-                {
-                    QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", cost, playerAccountId);
-                    sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s set level from %d to %d for %u voteshop points.", player->GetName(), playerLevel, playerLevel + 10, cost);
-                    skill_increase = 50;
-                    player->GiveLevel(playerLevel + 10);
-                }
-                break;
-            default:
+                levelUpChosen = 10;
                 break;
         }
 
-        if (skill_increase > 0)
+        uint32 skill_increase = levelUpChosen * 5;
+        uint32 cost = getVotepointCost(playerLevel, levelUpChosen);
+
+        if (levelUpChosen && cost && playerVotepoints >= cost)
+        {
+            QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", cost, playerAccountId);
+            sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s set level from %d to %d for %u voteshop points.", player->GetName(), playerLevel, playerLevel + levelUpChosen, cost);
+            player->GiveLevel(playerLevel + levelUpChosen);
+        }
+
+        if (skill_increase)
         {
             uint32 mainhand_skill = 0;
             player->UpdateSkill(SKILL_DEFENSE, skill_increase);
 
-            // mainhand
+            // Mainhand
             if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+            {
                 if (item->GetSkill() != 0)
                 {
-                    mainhand_skill = item->GetSkill(); // remember mainhand skill so we dont increase twice if mh skill = oh skill
+                    mainhand_skill = item->GetSkill(); // Remember mainhand skill so we dont increase twice if mh skill = oh skill
                     player->UpdateSkill(item->GetSkill(), skill_increase);
                     sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s has its main-hand weapon skill (%d) set to %d/%d (+%d)", player->GetName(), item->GetSkill(), player->GetSkillValue(item->GetSkill()), player->getLevel() * 5, skill_increase);
                 }
-            // offhand
+            }
+
+            // Offhand
             if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+            {
                 if (item->GetSkill() != 0 && item->GetSkill() != SKILL_SHIELD && item->GetSkill() != mainhand_skill)
                 {
                     player->UpdateSkill(item->GetSkill(), skill_increase);
                     sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s has its off-hand weapon skill (%d) set to %d/%d (+%d)", player->GetName(), item->GetSkill(), player->GetSkillValue(item->GetSkill()), player->getLevel() * 5, skill_increase);
                 }
-            // ranged
+            }
+
+            // Ranged
             if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+            {
                 if (item->GetSkill() != 0)
                 {
                     player->UpdateSkill(item->GetSkill(), skill_increase);
                     sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s has its ranged weapon skill (%d) set to %d/%d (+%d)", player->GetName(), item->GetSkill(), player->GetSkillValue(item->GetSkill()), player->getLevel() * 5, skill_increase);
                 }
+            }
         }
 
         player->CLOSE_GOSSIP_MENU();
