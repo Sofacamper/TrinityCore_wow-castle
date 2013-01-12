@@ -565,11 +565,11 @@ public:
                     me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     SetHoldState(true);
                     break;
-                case 47:
+                case 48:
                     SetRun(false);
                     DoScriptText(SAY_PHASE405, me);
                     break;
-                case 48:
+                case 49:
                     SetRun(true);
                     DoScriptText(SAY_PHASE406, me);
                     break;
