@@ -184,7 +184,7 @@ public:
             m_posPursuingSpikePositionZ = 0.0f;
             m_uiPursuingSpikeTimer = 2*IN_MILLISECONDS;
 
-            m_uiSummonFrostSphereTimer = urand(20, 30)*1000;
+            m_uiSummonFrostSphereTimer = 20*IN_MILLISECONDS;
 
             m_uiBerserkTimer = 10*MINUTE*IN_MILLISECONDS;
             m_uiStage = 0;
@@ -325,13 +325,13 @@ public:
                     if (m_uiFreezeSlashTimer <= uiDiff)
                     {
                         DoCastVictim(SPELL_FREEZE_SLASH);
-                        m_uiFreezeSlashTimer = urand(8*1000, 10*1000);
+                        m_uiFreezeSlashTimer = 15*IN_MILLISECONDS;
                     } else m_uiFreezeSlashTimer -= uiDiff;
 
                     if (m_uiPenetratingColdTimer <= uiDiff)
                     {
                         me->CastCustomSpell(SPELL_PENETRATING_COLD, SPELLVALUE_MAX_TARGETS, RAID_MODE(2, 5, 2, 5));
-                        m_uiPenetratingColdTimer = 18000;
+                        m_uiPenetratingColdTimer = 20*IN_MILLISECONDS;
                     } else m_uiPenetratingColdTimer -= uiDiff;
 
                     if (IsHeroic() || !m_bReachedPhase3)
@@ -343,7 +343,7 @@ public:
                             for (uint8 i = 0; i < maxSpawns; i++)
                                 me->SummonCreature(NPC_BURROWER, AnubarakLoc[i+2], TEMPSUMMON_CORPSE_DESPAWN);
 
-                            m_uiSummonNerubianTimer = 40000;
+                            m_uiSummonNerubianTimer = 45*IN_MILLISECONDS;
                         } else m_uiSummonNerubianTimer -= uiDiff;
                     }
 
@@ -353,7 +353,7 @@ public:
                         {
                             EntryCheckPredicate pred(NPC_BURROWER);
                             Summons.DoAction(ACTION_SHADOW_STRIKE, pred);
-                            m_uiNerubianShadowStrikeTimer = urand(20*1000, 30*1000);
+                            m_uiNerubianShadowStrikeTimer = 30*IN_MILLISECONDS;
                         } else m_uiNerubianShadowStrikeTimer -= uiDiff;
                     }
 
@@ -454,8 +454,10 @@ public:
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                     DoCast(me, SPELL_EMERGE_ANUBARAK);
                     me->GetMotionMaster()->MoveChase(me->getVictim());
+                    m_uiFreezeSlashTimer = 15*IN_MILLISECONDS;
+                    m_uiPenetratingColdTimer = 20*IN_MILLISECONDS;
                     m_uiSummonNerubianTimer = 10*1000;
-                    m_uiNerubianShadowStrikeTimer = urand(20*1000, 30*1000);
+                    m_uiNerubianShadowStrikeTimer = 30*IN_MILLISECONDS;
                     break;
             }
 
