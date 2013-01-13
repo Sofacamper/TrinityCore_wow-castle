@@ -1724,7 +1724,8 @@ class spell_blood_council_shadow_prison : public SpellScriptLoader
 
             void HandleDummyTick(AuraEffect const* aurEff)
             {
-                if (GetTarget()->isMoving())
+                // Shadow prison should only target players
+                if (GetTarget()->GetTypeId() == TYPEID_PLAYER && GetTarget()->isMoving())
                     GetTarget()->CastSpell(GetTarget(), SPELL_SHADOW_PRISON_DAMAGE, true, NULL, aurEff);
             }
 
