@@ -1323,8 +1323,12 @@ class npc_kinetic_bomb : public CreatureScript
                 }
                 else if (action == ACTION_KINETIC_BOMB_JUMP)
                 {
-                    me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MoveJump(_x, _y, 384.0f, 1.0f, 16.0f, 2);
+                    // Only begin moving up if we are not already moving up
+                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != EFFECT_MOTION_TYPE)
+                    {
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveJump(_x, _y, 384.0f, 1.0f, 16.0f, 2);
+                    }
                 }
             }
 
