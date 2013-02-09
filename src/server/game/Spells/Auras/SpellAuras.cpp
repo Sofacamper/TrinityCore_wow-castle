@@ -1210,6 +1210,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                     break;
                                 case 33721: // Spellpower Elixir
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.397f);
+                                    GetEffect(1)->SetAmount(GetEffect(1)->GetBaseAmount() * 1.397f);
                                     break;
                                 case 53746: // Wrath Elixir
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.355f);
@@ -1217,7 +1218,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 case 673:   // Elixir of Minor Defense
                                 case 2374:  // Elixir of Minor Agility
                                 case 2367:  // Elixir of Lion's Strength
-                                case 53758: // Flask of Stoneblood                                
+                                case 53758: // Flask of Stoneblood
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.5f);
                                     break;
                                 case 53755: // Flask of the Frost Wyrm
@@ -1241,7 +1242,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 case 33726: // Elixir of Mastery
                                 case 53747: // Elixir of Spirit
                                 case 53748: // Elixir of Mighty Strength
-                                case 53749: // Guru's Elixir                                
+                                case 53749: // Guru's Elixir
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.4f);
                                     break;
                                 case 53751: // Elixir of Mighty Fortitude
