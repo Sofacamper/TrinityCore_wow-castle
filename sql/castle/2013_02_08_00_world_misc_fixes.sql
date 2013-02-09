@@ -177,8 +177,8 @@ UPDATE `creature` SET `MovementType`=0,`spawndist`=0 WHERE `id`=31887;
 -- https://github.com/TrinityCore/TrinityCore/commit/c44c6248ecc52304a76ed5f44575fbf4e90abc80
 -- Add missing spawns
 DELETE FROM `creature` WHERE `id`=26405;
-INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`)  VALUES
-(300485,26405 ,571,1,1,0,1419,3317.76,-5112.08,300.462,1.78269,300,0,0,12762,3561,0,0,0,0); -- spawn NPC if there isn't, GUID is random
+INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`)  VALUES
+(26405 ,571,1,1,0,1419,3317.76,-5112.08,300.462,1.78269,300,0,0,12762,3561,0,0,0,0); -- spawn NPC if there isn't, GUID is random
 -- SAI for Thane
 DELETE FROM `creature_ai_scripts` WHERE `creature_id`=26405;
 UPDATE `creature_template` SET `AIName`='SmartAI',`faction_A`=1954,`faction_H`=1954 WHERE `entry`=26405 ;
