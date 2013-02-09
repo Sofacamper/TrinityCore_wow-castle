@@ -2240,9 +2240,13 @@ class npc_lich_king_spirit : public CreatureScript
                 // Target selection:
                 // - Do not select falling targets
                 // - In non heroic, Vile Spirits only select targets not in Frostmourne
-                // - In heroic, Vile Spirits only select targets not in Frostmourne
-                // - In heroic, Wicked Spirits only select targets in Frostmourne
-                return target->GetTypeId() == TYPEID_PLAYER && target->GetPositionZ() > 830.0f && ((!IsHeroic() && !target->HasAura(SPELL_IN_FROSTMOURNE_ROOM)) || (IsHeroic() && ((target->HasAura(SPELL_IN_FROSTMOURNE_ROOM) && me->GetEntry() == NPC_WICKED_SPIRIT) || (!target->HasAura(SPELL_IN_FROSTMOURNE_ROOM) && me->GetEntry() == NPC_VILE_SPIRIT))));
+                const bool condition_nh = !IsHeroic() && !target->HasAura(SPELL_IN_FROSTMOURNE_ROOM);
+                // - In 10m heroic, Vile Spirits only select targets not in Frostmourne
+                const bool condition_hc10m = IsHeroic() && !target->HasAura(SPELL_IN_FROSTMOURNE_ROOM) && me->GetEntry() == NPC_VILE_SPIRIT;
+                // - In 25m heroic, Wicked Spirits only select targets in Frostmourne
+                const bool condition_hc25m = IsHeroic() && target->HasAura(SPELL_IN_FROSTMOURNE_ROOM) && me->GetEntry() == NPC_WICKED_SPIRIT;
+
+                return target->GetTypeId() == TYPEID_PLAYER && target->GetPositionZ() > 830.0f && (condition_nh || condition_hc10m || condition_hc25m);
             }
 
             void SetData(uint32 type, uint32 value)

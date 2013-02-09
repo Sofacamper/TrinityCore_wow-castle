@@ -1145,7 +1145,79 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             // Mixology Effect Bonus
                             switch (GetSpellInfo()->Id)
                             {
-                                case 53758: // Flask of Stoneblood
+                                case 11390: // Arcane Elixir
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.6f);
+                                    break;
+                                case 11328: // Elixir of Agility
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 2.5f);
+                                    break;
+                                case 28491: // Elixir of Healing Power
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.5f);
+                                    GetEffect(1)->SetAmount(GetEffect(1)->GetBaseAmount() * 1.333f);
+                                    break;
+                                case 3164: // Elixir of Ogre's Strength
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.75f);
+                                    break;
+                                case 3220: // Elixir of Defense
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.466f);
+                                    break;
+                                case 3166: // Elixir of Wisdom
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.833f);
+                                    break;
+                                case 39627: // Elixir of Draenic Wisdom
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.266f);
+                                    break;
+                                case 54494: // Elixir of Major Agility
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.433f);
+                                    GetEffect(1)->SetAmount(GetEffect(1)->GetBaseAmount() * 1.5f);
+                                    break;
+                                case 39625: // Elixir of Major Fortitude
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.64f);
+                                    GetEffect(1)->SetAmount(GetEffect(1)->GetBaseAmount() * 1.6f);
+                                    break;
+                                case 28490: // Elixir of Major Strength
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.457f);
+                                    break;
+                                case 11349: // Elixir of Greater Defense
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.56f);
+                                    break;
+                                case 2378: // Elixir of Minor Fortitude
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.555f);
+                                    break;
+                                case 11348: // Elixir of Superior Defense
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.311f);
+                                    break;
+                                case 54452: // Adept's Elixir
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.541f);
+                                    GetEffect(1)->SetAmount(GetEffect(1)->GetBaseAmount() * 1.333f);
+                                    break;
+                                case 33720: // Onslaught Elixir
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.533f);
+                                    break;
+                                case 17538: // Elixir of the Mongoose
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.2f);
+                                    GetEffect(1)->SetAmount(GetEffect(1)->GetBaseAmount() * 1.5f);
+                                    break;
+                                case 8212: // Elixir of Giant Growth
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.1f);
+                                    GetEffect(1)->SetAmount(GetEffect(1)->GetBaseAmount() * 1.625f);
+                                    break;
+                                case 17539: // Greater Arcane Elixir
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.542f);
+                                    break;
+                                case 3219:  // Weak Troll's Blood Elixir
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 2.0f);
+                                    break;
+                                case 33721: // Spellpower Elixir
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.397f);
+                                    break;
+                                case 53746: // Wrath Elixir
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.355f);
+                                    break;
+                                case 673:   // Elixir of Minor Defense
+                                case 2374:  // Elixir of Minor Agility
+                                case 2367:  // Elixir of Lion's Strength
+                                case 53758: // Flask of Stoneblood                                
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.5f);
                                     break;
                                 case 53755: // Flask of the Frost Wyrm
@@ -1156,24 +1228,20 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.445f);
                                     GetEffect(1)->SetAmount(GetEffect(1)->GetBaseAmount() * 1.445f);
                                     break;
-                                case 54212: // Flask of the Mojo
-                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.445f);
-                                    break;
+                                case 11371: // Gift of Arthas (only resistance inc)
                                 case 53752: // Lesser Flask of Toughness
                                 case 62380: // Lesser Flask of Resistance
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.8f);
-                                    break;
-                                case 33721: // Spellpower Elixir
-                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.397f);
-                                    GetEffect(1)->SetAmount(GetEffect(1)->GetBaseAmount() * 1.397f);
                                     break;
                                 case 40068: // Wrath Elixir
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.356f); // fixme: patch 3.0.3
                                     GetEffect(1)->SetAmount(GetEffect(1)->GetBaseAmount() * 1.356f); // fixme: patch 3.0.3
                                     break;
+                                case 11405: // Elixir of Giants
+                                case 33726: // Elixir of Mastery
                                 case 53747: // Elixir of Spirit
                                 case 53748: // Elixir of Mighty Strength
-                                case 53749: // Guru's Elixir
+                                case 53749: // Guru's Elixir                                
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.4f);
                                     break;
                                 case 53751: // Elixir of Mighty Fortitude
@@ -1183,7 +1251,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 case 53763: // Elixir of Protection
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.35f);
                                     break;
+                                case 11334: // Elixir of Greater Agility
                                 case 28497: // Elixir of Mighty Agility
+                                case 54212: // Flask of the Mojo
                                 case 60340: // Elixir of Accuracy
                                 case 60341: // Elixir of Deadly Strikes
                                 case 60343: // Elixir of Mighty Defense
@@ -1194,7 +1264,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.445f);
                                     break;
                                 case 53764: // Elixir of Mighty Mageblood
-                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.334f); // fixme: patch 3.0.3
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.667f);
                                     break;
                                 default:
                                     // more research needs to be done for other potions and flasks...
