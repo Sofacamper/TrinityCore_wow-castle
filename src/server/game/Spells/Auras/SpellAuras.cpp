@@ -1218,6 +1218,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 case 673:   // Elixir of Minor Defense
                                 case 2374:  // Elixir of Minor Agility
                                 case 2367:  // Elixir of Lion's Strength
+                                case 17635: // Flask of the Titans
                                 case 53758: // Flask of Stoneblood
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.5f);
                                     break;
@@ -1266,6 +1267,18 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                     break;
                                 case 53764: // Elixir of Mighty Mageblood
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.667f);
+                                    break;
+                                case 28589: // Flask of Relentless Assault
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.333f);w
+                                    break;
+                                case 28591: // Flask of Pure Death
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.288f);
+                                    break;
+                                case 54213: // Flask of Pure Mojo
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.288f);
+                                    break;
+                                case 17636: // Flask of Distilled Wisdom
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetBaseAmount() * 1.308f);
                                     break;
                                 default:
                                     // more research needs to be done for other potions and flasks...
